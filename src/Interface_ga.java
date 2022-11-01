@@ -1,12 +1,5 @@
 /*
  * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
-import java.util.List;
-import javax.swing.text.html.parser.Entity;
-
 /**
  *
  * @author Archie

@@ -1,33 +1,18 @@
-import java.io.FileInputStream;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-
-import org.bson.Document;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
-
-
 
 public class IDMRequestToko {
     MqttClient client_transreport_login;
     MqttClient client_transreport;
-    Global_function gf = new Global_function();
-    Global_variable gv = new Global_variable();
+    Global_function gf = new Global_function(true);
     Interface_ga inter_login;
     Connection con;
     SQLConnection sqlcon = new SQLConnection();
@@ -292,7 +277,6 @@ public class IDMRequestToko {
 	                        //----------------------------- FILTER TOPIC NOT CONTAINS -------------------------------//
 	                        Date HariSekarang_run = new Date();
 	                        String payload = new String(message.getPayload());
-	                        int Qos = message.getQos();
 	                        String msg_type = "";
 	                        String message_ADT_Decompress = "";
 	                        try{
@@ -309,8 +293,10 @@ public class IDMRequestToko {
 	                        try{
 	                           gf.InsTransReport(Parser_TASK,Parser_ID,Parser_SOURCE,Parser_COMMAND,Parser_OTP,Parser_TANGGAL_JAM,Parser_VERSI,Parser_HASIL,Parser_TO,Parser_FROM,Parser_SN_HDD,Parser_IP_ADDRESS,Parser_STATION,Parser_CABANG,Parser_NAMA_FILE,Parser_CHAT_MESSAGE,Parser_REMOTE_PATH,Parser_LOCAL_PATH,Parser_SUB_ID,false,"INSERT","transreport");
 	                        }catch(Exception exc){
-	                            System.exit(0);
+	                            //System.exit(0);
 	                        }
+	                        String tanggal_jam = gf.get_tanggal_curdate_curtime();
+                        	gf.WriteFile("timemessage.txt", "", tanggal_jam, false);
 	                        //=========================================================//
 	                        gf.PrintMessage2("RECV > "+Parser_TASK,counter,msg_type,topic,Parser_TASK,Parser_FROM,Parser_TO,null,HariSekarang_run);
 	                        String get = "";                         
@@ -455,16 +441,18 @@ public class IDMRequestToko {
 		  System.out.println("=================================          START         ==================================");   
 	      try {
 			  client_transreport =  gf.get_ConnectionMQtt();
-			  String get_non_station = gf.get_non_station_tokomain();
+			  //String get_non_station = gf.get_non_station_tokomain();
 			  
-			  String get_topic_sub[] = gf.getTopicSub().split(",");
-			  String get_topic_pub = gf.getTopicPub();     
+			  String get_topic_sub[] = gf.en.getTopicSub().split(",");
+			  String get_topic_pub = gf.en.getTopicPub();     
 			  
 			  for(int i = 0;i<get_topic_sub.length;i++) {
 				  String res_topic_sub = get_topic_sub[i];
 				  //System.out.println(res_topic_sub);
 				  RunRequestListToko(res_topic_sub, 0, get_topic_pub);
 			  }
+			  
+			  
 			  System.out.println("PUBS : "+get_topic_pub);
 			  
 	      }catch(Exception exc){

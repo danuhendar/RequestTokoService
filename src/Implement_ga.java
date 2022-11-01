@@ -2,13 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JOptionPane;
-import javax.swing.text.html.parser.Entity;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 /**
@@ -93,7 +88,6 @@ public class Implement_ga implements Interface_ga{
         
         
             boolean stat = false;
-            StringBuffer result = new StringBuffer();
             try{
                 PreparedStatement sta = con.prepareStatement(procedure);
                 ResultSet rs = sta.executeQuery();
@@ -119,7 +113,6 @@ public class Implement_ga implements Interface_ga{
         
         
             int stat = 0;
-            StringBuffer result = new StringBuffer();
             try{
                 PreparedStatement sta = con.prepareStatement(procedure);
                 ResultSet rs = sta.executeQuery();

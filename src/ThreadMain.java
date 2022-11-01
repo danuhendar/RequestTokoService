@@ -1,4 +1,3 @@
-
 public class ThreadMain extends Thread {
 	IDMRequestToko idm;
      
