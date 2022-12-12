@@ -418,8 +418,15 @@ public class IDMRequestToko {
 	                            Parser_HASIL = get;
 	                            //System.out.println("HASIL : "+Parser_HASIL);
 	                            //System.out.println("============================================");
-	                            String res_topic = get_topic_pub.replace("FROM", Parser_FROM);
-	                            //System.out.println("TOPIC DEST : "+res_topic);
+	                            String nik = "";
+                                try {
+                                	String res_nik[] = Parser_FROM.split("_");
+                                	nik = res_nik[1];
+                                }catch(Exception exc) {
+                                	nik = Parser_FROM;
+                                }
+	                            String res_topic = get_topic_pub.replace("FROM", nik);
+	                            System.out.println("TOPIC DEST : "+res_topic);
 	                            Parser_TASK = "RESINITALLTOKO";
 	                            Parser_SOURCE = "IDMreporter";
 	                            String res_message = gf.CreateMessage(Parser_TASK,Parser_ID,Parser_SOURCE,Parser_COMMAND,Parser_OTP,Parser_TANGGAL_JAM,Parser_VERSI,Parser_HASIL,Parser_FROM,Parser_TO,Parser_SN_HDD,Parser_IP_ADDRESS,Parser_STATION,Parser_CABANG,"",Parser_NAMA_FILE,Parser_CHAT_MESSAGE,Parser_REMOTE_PATH,Parser_LOCAL_PATH,Parser_SUB_ID);
