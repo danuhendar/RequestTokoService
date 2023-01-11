@@ -1130,6 +1130,7 @@ public class Global_function {
                 final String serverUrl   = "tcp://"+res_broker_primary;
                 //System.out.println("serverUrl : "+serverUrl);
                 String clientId = UUID.randomUUID().toString();
+                
                 MemoryPersistence persistence = new MemoryPersistence();
                 send_transreport = new MqttClient(serverUrl, clientId,persistence);
                 MqttConnectOptions options = new MqttConnectOptions();
