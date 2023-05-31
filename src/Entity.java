@@ -25,8 +25,28 @@ public class Entity {
     String batas_menit;
     String TopicSub;
     String TopicPub;
+    String is_redis;
+    String time_second_cache;
     
-    public String getTopicSub() {
+    
+    
+    public String getIs_redis() {
+		return is_redis;
+	}
+
+	public void setIs_redis(String is_redis) {
+		this.is_redis = is_redis;
+	}
+
+	public String getTime_second_cache() {
+		return time_second_cache;
+	}
+
+	public void setTime_second_cache(String time_second_cache) {
+		this.time_second_cache = time_second_cache;
+	}
+
+	public String getTopicSub() {
 		return TopicSub;
 	}
 

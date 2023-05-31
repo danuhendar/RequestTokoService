@@ -301,12 +301,60 @@ public class IDMRequestToko {
                         	gf.WriteFile("timemessage.txt", "", tanggal_jam, false);
 	                        //=========================================================//
 	                        gf.PrintMessage2("RECV > "+Parser_TASK,counter,msg_type,topic,Parser_TASK,Parser_FROM,Parser_TO,null,HariSekarang_run);
-	                        String get = "";                         
+	                        String get = "";
+	                        Boolean is_redis = Boolean.parseBoolean(gf.en.getIs_redis());
+	                        int time_second_cache = Integer.parseInt(gf.en.getTime_second_cache());
 	                           try {
 	                        	   
-	                        	   	String exists_data = redis.getCache("LIST_TOKO_"+Parser_CABANG);
-	                                if(exists_data == null) {
-	                                	String sql_jabatan = "SELECT JABATAN FROM idm_org_structure WHERE NIK = '"+Parser_FROM.split("_")[1]+"';";
+	                        	   if(is_redis) {
+	                        		   String exists_data = redis.getCache("LIST_TOKO_"+Parser_CABANG);
+		                                if(exists_data == null) {
+		                                	String sql_jabatan = "SELECT JABATAN FROM idm_org_structure WHERE NIK = '"+Parser_FROM.split("_")[1]+"';";
+			                            	//System.out.println("sql_jabatan : "+sql_jabatan);
+			                            	String get_jabatan = gf.GetTransReport(sql_jabatan, 1, true);
+			                            	//System.out.println("get_jabatan : "+get_jabatan);
+			                            	String get_all_branch_code = gf.GetTransReport("SELECT GROUP_CONCAT(BRANCH_CODE) AS BRANCH_CODE FROM idm_org_branch", 1, true);
+			                            	String query_list_toko = "";
+			                            	if(get_jabatan.equals("REGIONAL_MANAGER") || get_jabatan.equals("MANAGER_EDPHO")) {
+			                            		query_list_toko = "SELECT a.KDCAB AS CABANG,\n" +
+			                                            "	a.TOKO,\n" +
+			                                            "	a.NAMA,\n" +
+			                                            "	a.STATION,\n" +
+			                                            "	REPLACE(REPLACE(a.IP, '\r', ''), '\n', '') AS IP,\n" +
+			                                            "	a.KONEKSI,\n" +
+			                                            "	IFNULL(CONCAT('READY ON : ',DATE_FORMAT(b.ADDTIME,'%d-%m-%Y %T')),'NEED INITIAL REQUEST') AS LAST_INITIAL_REPORT,\n" +
+			                                            "	a.IS_INDUK\n" +
+			                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"')) b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION\n"+
+			                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"') \n"+
+			                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
+			                            		
+			                            	}else {
+			                            		query_list_toko = "SELECT a.KDCAB AS CABANG,\n" +
+			                                            "	a.TOKO,\n" +
+			                                            "	a.NAMA,\n" +
+			                                            "	a.STATION,\n" +
+			                                            "	REPLACE(REPLACE(a.IP, '\r', ''), '\n', '') AS IP,\n" +
+			                                            "	a.KONEKSI,\n" +
+			                                            "	IFNULL(CONCAT('READY ON : ',DATE_FORMAT(b.ADDTIME,'%d-%m-%Y %T')),'NEED INITIAL REQUEST') AS LAST_INITIAL_REPORT,\n" +
+			                                            "	a.IS_INDUK\n" +
+			                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDCAB,a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a "+Parser_COMMAND+") b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION AND b.KDCAB=a.KDCAB \n"+
+			                                            "	\n" +Parser_COMMAND+ "\n"+
+			                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
+			                            		
+			                            		query_list_toko = query_list_toko.replace("where kdcab", "where a.KDCAB");
+			                            		 
+			                            	}
+			                            	System.out.println("query_list_toko : "+query_list_toko);
+		                                	get = gf.GetTransReport(query_list_toko, 8, false);//inter_login.call_get_procedure(query_list_toko.replace("where kdcab", "where a.KDCAB"), 7 , false);
+		                                	redis.setCache("LIST_TOKO_"+Parser_CABANG,get,time_second_cache);
+		                                	System.out.println("CACHE NOT EXISTS");
+		                                }else {
+		                                	get = redis.getCache("LIST_TOKO_"+Parser_CABANG);
+		                                	System.out.println("CACHE EXISTS");
+		                                }
+		                            //-- jika tidak menggunakan settingan redis atau is_redis = false --//    
+	                        	   }else {
+	                        		   String sql_jabatan = "SELECT JABATAN FROM idm_org_structure WHERE NIK = '"+Parser_FROM.split("_")[1]+"';";
 		                            	//System.out.println("sql_jabatan : "+sql_jabatan);
 		                            	String get_jabatan = gf.GetTransReport(sql_jabatan, 1, true);
 		                            	//System.out.println("get_jabatan : "+get_jabatan);
@@ -341,20 +389,55 @@ public class IDMRequestToko {
 		                            		query_list_toko = query_list_toko.replace("where kdcab", "where a.KDCAB");
 		                            		 
 		                            	}
+		                            	//System.out.println("query_list_toko : "+query_list_toko);
 	                                	get = gf.GetTransReport(query_list_toko, 8, false);//inter_login.call_get_procedure(query_list_toko.replace("where kdcab", "where a.KDCAB"), 7 , false);
-	                                	redis.setCache("LIST_TOKO_"+Parser_CABANG,get);
-	                                	System.out.println("CACHE NOT EXISTS");
-	                                }else {
-	                                	get = redis.getCache("LIST_TOKO_"+Parser_CABANG);
-	                                	System.out.println("CACHE EXISTS");
-	                                }
+	                                	System.out.println("IS REDIS FALSE");
+	                        	   }
+	                        	   	
 	                                
 	                                //System.err.println("kondisi 1 :"+query_list_toko+"\n");
 	                                //System.out.println("==========================================\n");
 	                               
 	                                
 	                            }catch(Exception exc) {
-	                            	exc.printStackTrace();
+	                            	gf.WriteLog("ERROR LIST TOKO : "+exc.toString(), true);
+	                            	String sql_jabatan = "SELECT JABATAN FROM idm_org_structure WHERE NIK = '"+Parser_FROM.split("_")[1]+"';";
+	                            	//System.out.println("sql_jabatan : "+sql_jabatan);
+	                            	String get_jabatan = gf.GetTransReport(sql_jabatan, 1, true);
+	                            	//System.out.println("get_jabatan : "+get_jabatan);
+	                            	String get_all_branch_code = gf.GetTransReport("SELECT GROUP_CONCAT(BRANCH_CODE) AS BRANCH_CODE FROM idm_org_branch", 1, true);
+	                            	String query_list_toko = "";
+	                            	if(get_jabatan.equals("REGIONAL_MANAGER") || get_jabatan.equals("MANAGER_EDPHO")) {
+	                            		query_list_toko = "SELECT a.KDCAB AS CABANG,\n" +
+	                                            "	a.TOKO,\n" +
+	                                            "	a.NAMA,\n" +
+	                                            "	a.STATION,\n" +
+	                                            "	REPLACE(REPLACE(a.IP, '\r', ''), '\n', '') AS IP,\n" +
+	                                            "	a.KONEKSI,\n" +
+	                                            "	IFNULL(CONCAT('READY ON : ',DATE_FORMAT(b.ADDTIME,'%d-%m-%Y %T')),'NEED INITIAL REQUEST') AS LAST_INITIAL_REPORT,\n" +
+	                                            "	a.IS_INDUK\n" +
+	                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"')) b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION\n"+
+	                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"') \n"+
+	                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
+	                            		
+	                            	}else {
+	                            		query_list_toko = "SELECT a.KDCAB AS CABANG,\n" +
+	                                            "	a.TOKO,\n" +
+	                                            "	a.NAMA,\n" +
+	                                            "	a.STATION,\n" +
+	                                            "	REPLACE(REPLACE(a.IP, '\r', ''), '\n', '') AS IP,\n" +
+	                                            "	a.KONEKSI,\n" +
+	                                            "	IFNULL(CONCAT('READY ON : ',DATE_FORMAT(b.ADDTIME,'%d-%m-%Y %T')),'NEED INITIAL REQUEST') AS LAST_INITIAL_REPORT,\n" +
+	                                            "	a.IS_INDUK\n" +
+	                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDCAB,a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a "+Parser_COMMAND+") b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION AND b.KDCAB=a.KDCAB \n"+
+	                                            "	\n" +Parser_COMMAND+ "\n"+
+	                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
+	                            		
+	                            		query_list_toko = query_list_toko.replace("where kdcab", "where a.KDCAB");
+	                            		 
+	                            	}
+                                	get = gf.GetTransReport(query_list_toko, 8, false);//inter_login.call_get_procedure(query_list_toko.replace("where kdcab", "where a.KDCAB"), 7 , false);
+                                
 	                            }
 	                            Parser_HASIL = get;
 	                            //System.out.println("HASIL : "+Parser_HASIL);
@@ -367,7 +450,7 @@ public class IDMRequestToko {
                                 	nik = Parser_FROM;
                                 }
 	                            String res_topic = get_topic_pub.replace("FROM", Parser_FROM);
-	                            
+	                            System.out.println("res_topic : "+res_topic);
 	                            Parser_TASK = "RESINITALLTOKO";
 	                            Parser_SOURCE = "IDMreporter";
 	                            String res_message = gf.CreateMessage(Parser_TASK,Parser_ID,Parser_SOURCE,Parser_COMMAND,Parser_OTP,Parser_TANGGAL_JAM,Parser_VERSI,Parser_HASIL,Parser_FROM,Parser_TO,Parser_SN_HDD,Parser_IP_ADDRESS,Parser_STATION,Parser_CABANG,"",Parser_NAMA_FILE,Parser_CHAT_MESSAGE,Parser_REMOTE_PATH,Parser_LOCAL_PATH,Parser_SUB_ID);

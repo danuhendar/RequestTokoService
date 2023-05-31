@@ -29,10 +29,10 @@ public class RedisConnect {
 		return isConnect;
 	}
 	
-	public void setCache(String IdCache,String dataCache) {
+	public void setCache(String IdCache,String dataCache,int time_second_cache) {
 		try {
 			jedis.set(IdCache, dataCache);
-			jedis.expire(IdCache, 1800);
+			jedis.expire(IdCache, time_second_cache);
 		}catch(Exception exc) {
 			exc.printStackTrace();
 		}

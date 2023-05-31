@@ -115,6 +115,9 @@ public class Global_function {
    	        en.setTopicPub(obj.get("topic_pub").toString());
    	        en.setTampilkan_query_console(obj.get("tampilkan_query_console").toString());
    	        en.setBatasMenit(obj.get("batas_menit").toString());
+   	        en.setIs_redis(obj.get("is_redis").toString());
+   	        en.setTime_second_cache(obj.get("time_second_cache").toString());
+   	        
 	        
    	        System.out.println("Load Setting Sukses");
    	        br.close();
