@@ -317,7 +317,7 @@ public class IDMRequestToko {
 			                            	String query_list_toko = "";
 			                            	int jam_kini = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 		                            		String is_recid = "RECID = '1'";
-		                            		if(jam_kini < 8) {
+		                            		if(jam_kini <= 8) {
 		                            			 is_recid = "";
 		                            		}else {
 		                            			 is_recid = "AND RECID = '1'";
@@ -369,7 +369,7 @@ public class IDMRequestToko {
 		                            	String query_list_toko = "";
 		                            	int jam_kini = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 	                            		String is_recid = "RECID = '1'";
-	                            		if(jam_kini < 8) {
+	                            		if(jam_kini <= 8) {
 	                            			 is_recid = "";
 	                            		}else {
 	                            			 is_recid = "AND RECID = '1'";
@@ -387,7 +387,7 @@ public class IDMRequestToko {
 		                                            "	a.IS_INDUK\n" +
 		                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"')) b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION\n"+
 		                                            "	INNER JOIN m_status_toko c ON a.TOKO=c.KDTK \n"+
-		                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"') AND c.IS_STATUS = 'Aktif' "+is_recid+" \n"+
+		                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"') \n"+
 		                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
 		                            		
 		                            	}else {
@@ -401,13 +401,13 @@ public class IDMRequestToko {
 		                                            "	a.IS_INDUK\n" +
 		                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDCAB,a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a "+Parser_COMMAND+") b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION AND b.KDCAB=a.KDCAB \n"+
 		                                            "	INNER JOIN m_status_toko c ON a.TOKO=c.KDTK \n"+
-		                                            "	\n" +Parser_COMMAND+ " AND c.IS_STATUS = 'Aktif' "+is_recid+" \n"+
+		                                            "	\n" +Parser_COMMAND+ " \n"+
 		                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
 		                            		
 		                            		query_list_toko = query_list_toko.replace("where kdcab", "where a.KDCAB");
 		                            		 
 		                            	}
-		                            	System.out.println("query_list_toko : "+query_list_toko);
+		                            	//System.out.println("query_list_toko : "+query_list_toko);
 	                                	get = gf.GetTransReport(query_list_toko, 8, false);//inter_login.call_get_procedure(query_list_toko.replace("where kdcab", "where a.KDCAB"), 7 , false);
 	                                	System.out.println("IS REDIS FALSE");
 	                                	//System.err.println("kondisi 2 :"+get+"\n");
@@ -427,7 +427,7 @@ public class IDMRequestToko {
 	                            	String query_list_toko = "";
 	                            	int jam_kini = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
                             		String is_recid = "RECID = '1'";
-                            		if(jam_kini < 8) {
+                            		if(jam_kini <= 8) {
                             			 is_recid = "";
                             		}else {
                             			 is_recid = "AND RECID = '1'";
@@ -443,7 +443,7 @@ public class IDMRequestToko {
 	                                            "	a.IS_INDUK\n" +
 	                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"')) b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION\n"+
 	                                            "	INNER JOIN m_status_toko c ON a.TOKO=c.KDTK \n"+
-	                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"')  AND c.IS_STATUS = 'Aktif' "+is_recid+"  \n"+
+	                                            "	WHERE a.KDCAB IN('"+get_all_branch_code.replaceAll(",", "','")+"') \n"+
 	                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
 	                            		
 	                            	}else {
@@ -457,7 +457,7 @@ public class IDMRequestToko {
 	                                            "	a.IS_INDUK\n" +
 	                                            "	FROM tokomain a LEFT JOIN (SELECT a.KDCAB,a.KDTK,a.STATION,a.`ADDTIME` FROM initreport a "+Parser_COMMAND+") b ON b.KDTK=REPLACE(REPLACE(a.TOKO, '', ''), '', '') AND b.STATION=a.STATION AND b.KDCAB=a.KDCAB \n"+
 	                                            "	INNER JOIN m_status_toko c ON a.TOKO=c.KDTK \n"+
-	                                            "	\n" +Parser_COMMAND+ " AND c.IS_STATUS = 'Aktif' "+is_recid+" \n"+
+	                                            "	\n" +Parser_COMMAND+ " \n"+
 	                                            "	ORDER BY a.KDCAB,a.TOKO,a.STATION ASC;";
 	                            		
 	                            		query_list_toko = query_list_toko.replace("where kdcab", "where a.KDCAB");
@@ -490,9 +490,9 @@ public class IDMRequestToko {
 	                           
 	                            //System.out.println("Size : "+ (bytemessage.length / 1024)+" Kb");
 	                            gf.PublishMessageAndDocumenter(res_topic, bytemessage, counter, res_message,0);
-	                            System.out.println("TOPIC DEST : "+res_topic);           
+	                            System.out.println("TOPIC DEST : "+res_topic); 
+	                            System.gc();
 	            }
-	             
 	        });
         }catch(Exception exc) {}
     }
